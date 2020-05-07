@@ -1,0 +1,6 @@
+# Generate mp4 at 1080p for reg 00 snapshot 010_z005p000
+ffmpeg -framerate 60 -pattern_type glob -i 'plots/spheres/All/all_parts_animation_reg00_snap010_z005p000_angle*.png' -vcodec libx264 -s 1920x1080 -pix_fmt yuv420p plots/spheres/All_movies/flythrough_reg00_snapz005p000.mp4
+
+
+# Loop short movie
+ffmpeg -stream_loop -1 -i input.mp4 -c copy output.mp4
