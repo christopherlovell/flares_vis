@@ -19,12 +19,17 @@ def read_hdf5(f,z_cood,tol=12):
 
     if len(dat) > 0:
         return dat
+    else:
+        return None
 
 
+def sigmoid(x):
+    return 1 / (1 + np.exp(x))
 
 
-def plot_parent(i,dl,res,centre,z_centre):
-    dl = (3200-(i*5)) / 2
+def plot_parent(i,P,n,res,centre,z_centre):
+    # dl = (3200-(i*5)) / 2
+    dl = sigmoid((i - n/2)/(n/10)) * 3200/2
     convers = res/(2*dl) # conversion factor
 
     ## Start figure ##
@@ -46,6 +51,11 @@ def plot_parent(i,dl,res,centre,z_centre):
     # ax.yaxis.set_major_formatter(FuncFormatter(lambda x, pos: x/convers))
     # ax.set_xlabel('$\mathrm{Mpc}$',size=15)
     # ax.set_ylabel('$\mathrm{Mpc}$',size=15)
+
+    ## delete borders
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    plt.autoscale(tight=True)
 
     fig.savefig('plots/parent_zoom/parent_zoom_%s.png'%i, dpi=299)
     # fig.show()
