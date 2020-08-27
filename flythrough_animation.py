@@ -13,70 +13,71 @@ from guppy import hpy; h=hpy()
 import os
 
 
-def _sphere(coords, a, b, c, r):
+# def _sphere(coords, a, b, c, r):
+# 
+#     # Equation of a sphere
+#     x, y, z = coords[:, 0], coords[:, 1], coords[:, 2]
+# 
+#     return (x - a) ** 2 + (y - b) ** 2 + (z - c) ** 2 - r ** 2
+# 
+# 
+# def spherical_region(sim, snap):
+#     """
+#     Inspired from David Turner's suggestion
+#     """
+# 
+#     dm_cood = E.read_array('PARTDATA', sim, snap, '/PartType1/Coordinates',
+#                            noH=True, physicalUnits=False, numThreads=4)  # dm particle coordinates
+# 
+#     hull = ConvexHull(dm_cood)
+# 
+#     print('Defined convex hull')
+# 
+#     cen = [np.median(dm_cood[:, 0]), np.median(dm_cood[:, 1]), np.median(dm_cood[:,2])]
+#     pedge = dm_cood[hull.vertices]  #edge particles
+#     y_obs = np.zeros(len(pedge))
+#     p0 = np.append(cen, 15 / 0.677)
+# 
+#     print('Defined convex hull')
+# 
+#     popt, pcov = curve_fit(_sphere, pedge, y_obs, p0, method='lm', sigma=np.ones(len(pedge)) * 0.001)
+#     dist = np.sqrt(np.sum((pedge-popt[:3])**2, axis=1))
+#     centre, radius, mindist = popt[:3], popt[3], np.min(dist)
+# 
+#     print('computed fit')
+# 
+#     return centre, radius, mindist
+# 
+# 
+# def get_normalised_image(img, vmin=None, vmax=None):
+# 
+#     if vmin == None:
+#         vmin = np.min(img)
+#     if vmax == None:
+#         vmax = np.max(img)
+# 
+#     img = np.clip(img, vmin, vmax)
+#     img = (img - vmin) / (vmax - vmin)
+# 
+#     return img
+# 
+# 
+# def get_sphere_data(path, snap, part_type, soft):
+# 
+#     # Get positions masses and smoothing lengths
+#     poss = E.read_array('SNAP', path, snap, 'PartType' + str(part_type) + '/Coordinates',
+#                         noH=True, numThreads=8)
+#     if part_type != 1:
+#         masses = E.read_array('SNAP', path, snap, 'PartType' + str(part_type) + '/Mass',
+#                               noH=True, numThreads=8) * 10 ** 10
+#         smls = E.read_array('SNAP', path, snap, 'PartType' + str(part_type) + '/SmoothingLength',
+#                             noH=True, numThreads=8)
+#     else:
+#         masses = np.ones(poss.shape[0])
+#         smls = np.full_like(masses, soft)
+# 
+#     return poss, masses, smls
 
-    # Equation of a sphere
-    x, y, z = coords[:, 0], coords[:, 1], coords[:, 2]
-
-    return (x - a) ** 2 + (y - b) ** 2 + (z - c) ** 2 - r ** 2
-
-
-def spherical_region(sim, snap):
-    """
-    Inspired from David Turner's suggestion
-    """
-
-    dm_cood = E.read_array('PARTDATA', sim, snap, '/PartType1/Coordinates',
-                           noH=True, physicalUnits=False, numThreads=4)  # dm particle coordinates
-
-    hull = ConvexHull(dm_cood)
-
-    print('Defined convex hull')
-
-    cen = [np.median(dm_cood[:, 0]), np.median(dm_cood[:, 1]), np.median(dm_cood[:,2])]
-    pedge = dm_cood[hull.vertices]  #edge particles
-    y_obs = np.zeros(len(pedge))
-    p0 = np.append(cen, 15 / 0.677)
-
-    print('Defined convex hull')
-
-    popt, pcov = curve_fit(_sphere, pedge, y_obs, p0, method='lm', sigma=np.ones(len(pedge)) * 0.001)
-    dist = np.sqrt(np.sum((pedge-popt[:3])**2, axis=1))
-    centre, radius, mindist = popt[:3], popt[3], np.min(dist)
-
-    print('computed fit')
-
-    return centre, radius, mindist
-
-
-def get_normalised_image(img, vmin=None, vmax=None):
-
-    if vmin == None:
-        vmin = np.min(img)
-    if vmax == None:
-        vmax = np.max(img)
-
-    img = np.clip(img, vmin, vmax)
-    img = (img - vmin) / (vmax - vmin)
-
-    return img
-
-
-def get_sphere_data(path, snap, part_type, soft):
-
-    # Get positions masses and smoothing lengths
-    poss = E.read_array('SNAP', path, snap, 'PartType' + str(part_type) + '/Coordinates',
-                        noH=True, numThreads=8)
-    if part_type != 1:
-        masses = E.read_array('SNAP', path, snap, 'PartType' + str(part_type) + '/Mass',
-                              noH=True, numThreads=8) * 10 ** 10
-        smls = E.read_array('SNAP', path, snap, 'PartType' + str(part_type) + '/SmoothingLength',
-                            noH=True, numThreads=8)
-    else:
-        masses = np.ones(poss.shape[0])
-        smls = np.full_like(masses, soft)
-
-    return poss, masses, smls
 
 
 def getimage(path, snap, soft, num, centre, data, part_type):
