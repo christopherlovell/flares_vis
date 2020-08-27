@@ -31,6 +31,11 @@ def read_hdf5(f,z_cood,tol=12):
         return None
 
 
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(x))
+
 def modified_sigmoid(x,k):
     if x == 0:
         return 0.

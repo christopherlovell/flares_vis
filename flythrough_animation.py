@@ -13,7 +13,6 @@ from guppy import hpy; h=hpy()
 import os
 
 
-
 # def _sphere(coords, a, b, c, r):
 # 
 #     # Equation of a sphere
@@ -78,6 +77,7 @@ import os
 #         smls = np.full_like(masses, soft)
 # 
 #     return poss, masses, smls
+
 
 
 def getimage(path, snap, soft, num, centre, data, part_type):
