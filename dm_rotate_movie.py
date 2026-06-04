@@ -4,54 +4,59 @@ import matplotlib as mpl
 mpl.use('Agg')  # for SLURM use
 import matplotlib.pyplot as plt
 import numpy as np
-import eagle as E
+import eagle_IO.eagle_IO as E
 
 import sphviewer as sph
 from sphviewer.tools import cmaps as sph_cmaps  # custom py-sphviewer cmaps
-import vis_util
-# from importlib import reload  
-# reload(vis_util)
+import flaresvis
 
 sim = '/cosma7/data/dp004/dc-love2/data/G-EAGLE/geagle_0000/data' 
-tag = '014_z004p770'
+tag = '012_z004p688'
 
-## get input
-if len(sys.argv) > 1:
-    n1 = int(sys.argv[1])
-    n2 = int(sys.argv[2])
-    nrange = np.arange(n1,n2)
-else:
-    nrange = np.arange(0,360)
+N = 1080
+# nrange = np.arange(0,N)
+prange = np.linspace(0,360,N)
+
+proc = int(sys.argv[1])
+block = int(sys.argv[2])
+nrange = np.arange(proc,N,block)
 
 ## particle properties
 
-coods = E.readArray("SNAPSHOT", sim, tag, "/PartType1/Coordinates", numThreads=1)
+coods = E.read_array("SNAPSHOT", sim, tag, "/PartType1/Coordinates", numThreads=1, noH=True)
 
 ## subhalo properties
 
-sh_cop = E.readArray("SUBFIND", sim, tag, "/Subhalo/CentreOfPotential", numThreads=1)
-sh_mstar = E.readArray("SUBFIND", sim, tag, "/Subhalo/Stars/Mass", numThreads=1)
-# hmpr = E.readArray("SUBFIND", sim, tag, "/Subhalo/HalfMassProjRad", numThreads=1)
-spin = E.readArray("SUBFIND", sim, tag, "/Subhalo/GasSpin", numThreads=1)
-# sh_hmr = E.readArray("SUBFIND", sim, tag, "/Subhalo/HalfMassRad", numThreads=1)
+#sh_cop = E.read_array("SUBFIND", sim, tag, "/Subhalo/CentreOfPotential", numThreads=1)
+#sh_mstar = E.read_array("SUBFIND", sim, tag, "/Subhalo/Stars/Mass", numThreads=1)
+## hmpr = E.read_array("SUBFIND", sim, tag, "/Subhalo/HalfMassProjRad", numThreads=1)
+#spin = E.read_array("SUBFIND", sim, tag, "/Subhalo/GasSpin", numThreads=1)
+## sh_hmr = E.read_array("SUBFIND", sim, tag, "/Subhalo/HalfMassRad", numThreads=1)
 
 ## set centre of box
 
-idx = np.argsort(sh_mstar)[::-1][0]
-a,b,c = sh_cop[idx]      # use most massive (mstar) halo
+# idx = np.argsort(sh_mstar)[::-1][0]
+# a,b,c = sh_cop[idx]      # use most massive (mstar) halo
+a,b,c = [1600] * 3
 
 ## Align with spin axis of galaxy
 
-s = spin[idx]
-t = np.arctan(s[0]/s[2]) * 180./np.pi
-p = np.arctan(s[1]/s[2]) * 180./np.pi
+# s = spin[idx]
+# t = np.arctan(s[0]/s[2]) * 180./np.pi
+# p = np.arctan(s[1]/s[2]) * 180./np.pi
+t,p = [0] * 2
 
-## Create particle and camera objects
-scaling=1
-P = sph.Particles(np.array(coods - [a,b,c]) * scaling, np.ones(len(coods)))
+## Create part:icle and camera objects
+# scaling=1
+from scipy.spatial.distance import cdist
+R_dist = cdist(coods, [[a,b,c]])
+mask = R_dist < ((14./0.6777)-1)
+mask = mask.flatten()
 
-C = sph.Camera(x=0,y=0,z=0,
-               r=1,zoom=1,
+P = sph.Particles(coods[mask], np.ones(len(coods)))
+
+C = sph.Camera(x=a,y=b,z=c,
+               r=45,zoom=1,
                t=t,p=p,roll=0,
                xsize=4000,ysize=2250)  # 16:9
 
@@ -59,24 +64,24 @@ C = sph.Camera(x=0,y=0,z=0,
 S = sph.Scene(P, Camera=C)
 
 ## loop round object
-for i in nrange:
+for j,p in zip(nrange, prange[nrange]):
 
-    print("p = %s"%i)
+    print("p = %s"%p)
     sys.stdout.flush()
 
     ## update scene camera
-    S.update_camera(p=i)
+    S.update_camera(p=p)
 
     R = sph.Render(S)
     
     ## Get image and plot
     R.set_logscale()
     dm_img = R.get_image()
-    dm_img = sph_cmaps.night()(vis_util.get_normalized_image(dm_img,vmin=0,vmax=2.6))
+    dm_img = sph_cmaps.twilight()(flaresvis.get_normalized_image(dm_img,vmin=4,vmax=6.5))
 
-    fig, ax = vis_util.plot_img(dm_img, R.get_extent())
+    fig, ax = flaresvis.plot_img(dm_img, R.get_extent())
 
-    fig.savefig('movie_images/dm_test_zoom_1_r_1_p_%03d.png'% i, bbox_inches='tight', pad_inches=0)
+    fig.savefig('movie_images/dm_test_zoom_1_r_1_p_%05d.png'%j, bbox_inches='tight', pad_inches=0)
 
     plt.close()
 
